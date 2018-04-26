@@ -3,6 +3,7 @@ import datetime
 
 import tornado.ioloop
 import tornado.web
+from tornado.escape import json_decode
 from werobot import WeRoBot
 from werobot.contrib.tornado import make_handler
 
@@ -13,7 +14,6 @@ from db.wechat import Wechat
 from werobot.replies import SuccessReply
 
 myrobot = WeRoBot(config=config)
-
 
 
 @myrobot.subscribe
@@ -120,9 +120,25 @@ def unsubscribe(message):
     return SuccessReply()
 
 
+class TemplateHandler(tornado.web.RequestHandler):
+    def post(self):
+        if self.request.body:
+            data = json_decode(self.request.body)
+            r = myrobot.client.post(
+                url="https://api.weixin.qq.com/cgi-bin/message/template/send",
+                data=data
+            )
+            self.write(r)
+        else:
+            self.set_status(400)
+            self.write({"code": 40001, "message": "无效的data"})
+
+
 application = tornado.web.Application([
     (r"/robot/", make_handler(myrobot)),
+    (r"/template/", TemplateHandler)
 ])
+
 
 if __name__ == "__main__":
     application.listen(8888)
