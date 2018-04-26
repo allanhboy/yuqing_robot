@@ -10,7 +10,10 @@ from config import config
 from db import DBSession
 from db.wechat import Wechat
 
+from werobot.replies import SuccessReply
+
 myrobot = WeRoBot(config=config)
+
 
 
 @myrobot.subscribe
@@ -93,7 +96,7 @@ def subscribe(message):
                 }
             }
         )
-        return 'success'
+        return SuccessReply()
         # return 'Hello %s!' % user['nickname']
     else:
         return 'Hello My Friend!'
@@ -114,7 +117,7 @@ def unsubscribe(message):
     session.commit()
     session.close()
 
-    return 'success'
+    return SuccessReply()
 
 
 application = tornado.web.Application([
