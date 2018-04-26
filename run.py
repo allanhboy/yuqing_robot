@@ -7,12 +7,13 @@ from config import config
 
 myrobot = WeRoBot(config=config)
 
-print(myrobot.config)
-
 @myrobot.subscribe
 def subscribe(message):
-    print(message)
-    return 'Hello My Friend!'
+    user = myrobot.client.get_user_info(message.source)
+    if user:
+        return 'Hello %s!'% user['nickname']
+    else:
+        return 'Hello My Friend!'
 
 @myrobot.unsubscribe
 def unsubscribe(message):
