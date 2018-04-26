@@ -5,12 +5,13 @@ from sqlalchemy import (BigInteger, Boolean, Column, DateTime, Integer, String,
                         create_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 
 Base = declarative_base()
 
 env_dist = os.environ
 connect_str = env_dist.get('MYSQL_CONNECTSTRING', 'mysql+pymysql://root:addie5kaiK3@localhost:3306/syzb_spider_db?charset=utf8')
 
-engine = create_engine(connect_str)
+engine = create_engine(connect_str, poolclass=NullPool)
 
 DBSession = sessionmaker(bind=engine)
