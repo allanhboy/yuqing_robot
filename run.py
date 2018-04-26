@@ -22,6 +22,20 @@ def subscribe(message):
             Wechat.openid == user['openid']).one_or_none()
         if wechat:
             wechat.subscribe = True
+            wechat.nickname=user['nickname']
+            wechat.sex=user.get('sex', 0)
+            wechat.city=user.get('city')
+            wechat.country=user.get('country')
+            wechat.province=user.get('province')
+            wechat.language=user.get('language')
+            wechat.headimgurl=user.get('headimgurl')
+            wechat.subscribe_time=datetime.datetime.fromtimestamp(int(user['subscribe_time']))
+            wechat.unionid=user.get('unionid')
+            wechat.remark=user.get('remark')
+            wechat.groupid=user.get('groupid')
+            wechat.tagid_list=','.join([str(x) for x in user.get('tagid_list', [])])
+            wechat.subscribe_scene=user.get('subscribe_scene')
+            wechat.qr_scene_str=user.get('qr_scene_str')
         else:
             wechat = Wechat(
                 openid=user['openid'],
@@ -54,7 +68,18 @@ def subscribe(message):
 
 @myrobot.unsubscribe
 def unsubscribe(message):
-    return 'Goodbye My Friend!'
+    session = DBSession()
+    wechat = session.query(Wechat).filter(Wechat.openid == message.source).one_or_none()
+    if wechat:
+        wechat.subscribe = False
+        wechat.unsubscribe_time = datetime.datetime.now()
+    else:
+        wechat = Wechat(openid = message.source, subscribe=False, unsubscribe_time=datetime.datetime.now(), create_time=datetime.datetime.now())
+        session.add(wechat)
+    session.commit()
+    session.close()
+
+    return ''
 
 
 application = tornado.web.Application([

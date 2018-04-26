@@ -28,3 +28,4 @@ class Wechat(Base):
     qr_scene = Column(String)
     qr_scene_str = Column(String)
     create_time = Column(TIMESTAMP)
+    unsubscribe_time = Column(TIMESTAMP)
