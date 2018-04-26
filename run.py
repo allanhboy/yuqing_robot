@@ -15,6 +15,7 @@ myrobot = WeRoBot(config=config)
 
 @myrobot.subscribe
 def subscribe(message):
+    template_id = 'SO8Yjl0gcmNI0HW-pzgkpJqlPz0GV28llZNVoBjsspA'
     user = myrobot.client.get_user_info(message.source)
     if user:
         session = DBSession()
@@ -22,20 +23,22 @@ def subscribe(message):
             Wechat.openid == user['openid']).one_or_none()
         if wechat:
             wechat.subscribe = True
-            wechat.nickname=user['nickname']
-            wechat.sex=user.get('sex', 0)
-            wechat.city=user.get('city')
-            wechat.country=user.get('country')
-            wechat.province=user.get('province')
-            wechat.language=user.get('language')
-            wechat.headimgurl=user.get('headimgurl')
-            wechat.subscribe_time=datetime.datetime.fromtimestamp(int(user['subscribe_time']))
-            wechat.unionid=user.get('unionid')
-            wechat.remark=user.get('remark')
-            wechat.groupid=user.get('groupid')
-            wechat.tagid_list=','.join([str(x) for x in user.get('tagid_list', [])])
-            wechat.subscribe_scene=user.get('subscribe_scene')
-            wechat.qr_scene_str=user.get('qr_scene_str')
+            wechat.nickname = user['nickname']
+            wechat.sex = user.get('sex', 0)
+            wechat.city = user.get('city')
+            wechat.country = user.get('country')
+            wechat.province = user.get('province')
+            wechat.language = user.get('language')
+            wechat.headimgurl = user.get('headimgurl')
+            wechat.subscribe_time = datetime.datetime.fromtimestamp(
+                int(user['subscribe_time']))
+            wechat.unionid = user.get('unionid')
+            wechat.remark = user.get('remark')
+            wechat.groupid = user.get('groupid')
+            wechat.tagid_list = ','.join(
+                [str(x) for x in user.get('tagid_list', [])])
+            wechat.subscribe_scene = user.get('subscribe_scene')
+            wechat.qr_scene_str = user.get('qr_scene_str')
         else:
             wechat = Wechat(
                 openid=user['openid'],
@@ -53,7 +56,7 @@ def subscribe(message):
                 remark=user.get('remark'),
                 groupid=user.get('groupid'),
                 tagid_list=','.join([str(x)
-                                        for x in user.get('tagid_list', [])]),
+                                     for x in user.get('tagid_list', [])]),
                 subscribe_scene=user.get('subscribe_scene'),
                 qr_scene_str=user.get('qr_scene_str'),
                 create_time=datetime.datetime.now()
@@ -61,7 +64,37 @@ def subscribe(message):
             session.add(wechat)
         session.commit()
         session.close()
-        return 'Hello %s!' % user['nickname']
+        r = myrobot.client.post(
+            url="https://api.weixin.qq.com/cgi-bin/message/template/send",
+            data={
+                "touser": message.source,
+                "template_id": template_id,
+                "data": {
+                    "first": {
+                        "value": "欢迎关注'千济方开发者开台'公众号",
+                        "color": "#173177"
+                    },
+                    "keyword1": {
+                        "value": "你可点击进入,进行账号绑定.",
+                        "color": "#173177"
+                    },
+                    "keyword2": {
+                        "value": "13888888888",
+                        "color": "#173177"
+                    },
+                    "remark": {
+                        "value": "如有疑问，请联系小孟",
+                        "color": "#173177"
+                    }
+                },
+                "miniprogram": {
+                    "appid": "wx79edc80703771261",
+                    #"pagepath": "pages/monitor/monitor"
+                }
+            }
+        )
+        return 'success'
+        # return 'Hello %s!' % user['nickname']
     else:
         return 'Hello My Friend!'
 
@@ -69,17 +102,19 @@ def subscribe(message):
 @myrobot.unsubscribe
 def unsubscribe(message):
     session = DBSession()
-    wechat = session.query(Wechat).filter(Wechat.openid == message.source).one_or_none()
+    wechat = session.query(Wechat).filter(
+        Wechat.openid == message.source).one_or_none()
     if wechat:
         wechat.subscribe = False
         wechat.unsubscribe_time = datetime.datetime.now()
     else:
-        wechat = Wechat(openid = message.source, subscribe=False, unsubscribe_time=datetime.datetime.now(), create_time=datetime.datetime.now())
+        wechat = Wechat(openid=message.source, subscribe=False,
+                        unsubscribe_time=datetime.datetime.now(), create_time=datetime.datetime.now())
         session.add(wechat)
     session.commit()
     session.close()
 
-    return 'Goodbye!'
+    return 'success'
 
 
 application = tornado.web.Application([
