@@ -9,9 +9,15 @@ myrobot = WeRoBot(config=config)
 
 print(myrobot.config)
 
-@myrobot.handler
-def hello(message):
-    return 'Hello World!'
+@myrobot.subscribe
+def subscribe(message):
+    print(message)
+    return 'Hello My Friend!'
+
+@myrobot.unsubscribe
+def unsubscribe(message):
+    print(message)
+    return 'Goodbye My Friend!'
 
 application = tornado.web.Application([
     (r"/robot/", make_handler(myrobot)),
