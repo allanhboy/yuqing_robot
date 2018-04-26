@@ -79,7 +79,7 @@ def unsubscribe(message):
     session.commit()
     session.close()
 
-    return ''
+    return 'Goodbye!'
 
 
 application = tornado.web.Application([
